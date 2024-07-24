@@ -4,6 +4,4 @@ let
 in
 {
     environment.systemPackages = with pkgs; hostPackages;
-    # environment.systemPackages = with pkgs; [
-    # ] ++ [hostPackages];
 }

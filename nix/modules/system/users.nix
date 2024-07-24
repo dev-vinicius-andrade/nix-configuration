@@ -11,9 +11,6 @@ let
       ignoreShellProgramCheck= user.ignoreShellProgramCheck;
     };
   };
-  # createProgramConfig = program: {
-  #   "${program}".enable = true;
-  # };
   copyFiles = src: dest: ''
     mkdir -p ${dest}
     cp -r ${src}/* ${dest}

@@ -29,7 +29,7 @@
                     #url="git@github.com:dev-vinicius-andrade/dotfiles.git";
                     url="https://github.com/dev-vinicius-andrade/dotfiles.git";
                     ref="main";
-                    commit_id="84d2af76b7d0c69743162a1378c356660a5aa0cb";
+                    commit_id="d0132963d81d3c9747b9021a49039fb7cc12ac76";
                 };
             };
             ignoreShellProgramCheck = true;
@@ -44,8 +44,9 @@
                 "ripgrep"
                 "jq"
                 "lazygit"
-                "nodePackages_latest.nodejs"
+                "nodejs"
             ];
         }];
     };
+    docker= {};
 }
