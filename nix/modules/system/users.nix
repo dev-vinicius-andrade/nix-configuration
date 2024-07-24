@@ -63,6 +63,7 @@ let
               ${createSymlink user "${writableDotfiles}/nvim" "/home/${user.name}/.config/nvim"}
               ${createSymlink user "${writableDotfiles}/starship" "/home/${user.name}/.config/starship"}
               ${createSymlink user "${writableDotfiles}/nushell" "/home/${user.name}/.config/nushell"}
+              ${createSymlink user "${writableDotfiles}/zellij" "/home/${user.name}/.config/zellij"}
             else
               echo "Dotfiles are null" >> /home/${user.name}/debug.log
             fi
@@ -74,14 +75,9 @@ let
 
   userConfigs = map createUserConfig hosts_vars.users.users;
   homeManagerConfigs = map (user: createHomeManagerConfig user) hosts_vars.users.users;
-#   neovimConfig = if lib.elem "neovim" hosts_vars.programs then
-#     (import ../programs/neovim.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
-#  else
-#     {};
 in
 {
   imports=[];
-  #++[neovimConfig];
   options = {
   };
   config = lib.mkIf hosts_vars.users.enable {

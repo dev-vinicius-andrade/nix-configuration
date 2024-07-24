@@ -10,7 +10,6 @@ in
         (import ../../modules/system/boot.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
         (import ../../modules/system/network.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
         (import ../../modules/system/users.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
-        # (import ../../modules/system/programs.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
         (import ../../modules/system/fonts.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
         (import ../../modules/system/packages/common.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
     ];
