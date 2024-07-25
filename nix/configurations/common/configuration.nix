@@ -11,6 +11,7 @@ in
         (import ../../modules/system/network.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
         (import ../../modules/system/users.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
         (import ../../modules/system/fonts.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
+        (import ../../modules/system/docker.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
         (import ../../modules/system/packages/common.nix {common_vars = common_vars; hosts_vars=hosts_vars;})
     ];
     time.timeZone = common_vars.timeZone;

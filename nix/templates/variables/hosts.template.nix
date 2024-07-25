@@ -48,5 +48,7 @@
             ];
         }];
     };
-    docker= {};
+    docker= {
+        storageDriver=null;
+    };
 }
