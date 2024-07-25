@@ -12,6 +12,7 @@
             "eza"
             "direnv"
             "gcc"
+            "xclip"
         ];
     };
     users = {
@@ -29,7 +30,7 @@
                     #url="git@github.com:dev-vinicius-andrade/dotfiles.git";
                     url="https://github.com/dev-vinicius-andrade/dotfiles.git";
                     ref="main";
-                    commit_id="d0132963d81d3c9747b9021a49039fb7cc12ac76";
+                    commit_id="08c46cae3044dd521c5f7f1a26060463f25a25f2";
                 };
             };
             ignoreShellProgramCheck = true;

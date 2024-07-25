@@ -4,7 +4,7 @@ Personal nix configuration files.
 This repository contains my development environment configuration which are configured using Flakes and Disko.
 
 ## Table of Contents
-
+- []
 - [Installation] (#installation)
   - [Pre-Requisites] (#pre-requisites)
   - [Change Current user] (#change-current-user)
@@ -59,85 +59,47 @@ As I wanted to connect to the machine using ssh, I need to set a root password.
     passwd
 ```
 
-### Create a directory to clone the repository
+### Installing git
 
-As I'm going to use symlinks to the nixos configuration files I need to create a directory to clone the repository, the directory can be anywhere that you want, but I prefer to use the `/mnt/etc/dotfiles` directory.
+As I wan't to use my personal dotfiles, I needed to install git in the **iso** system, you can check more about why [here](#configurations-dotfiles)    
 
 ```bash
-    #if the /mnt/etc/nixos exists, create a backup for it
-    mv /mnt/etc/nixos /mnt/etc/nixos.bkp 
-    mkdir -p /mnt/etc/dotfiles
+    nix-env -i git
+```
+
+It may take a while, but after the installation you can clone the repository, either using git or curl.
+
+### Cloning the repository
+
+You can clone the repository using:
+
+- [Git](#cloning-the-repository-using-git);
+- [Curl](#cloning-the-repository-using-curl);
+
+#### Cloning the repository using git
+
+```bash
+    git clone https://github.com/dev-vinicius-andrade/nix-configuration.git
+```
+
+#### Cloning the repository using curl
+
+```bash
+     mkdir -p /root/nixos-configuration && \
+    curl -L https://github.com/dev-vinicius-andrade/nix-configuration/archive/refs/heads/main.tar.gz | tar xz --strip-components=1 -C /root/nixos-configuration
 ```
 
 > Note: You can change the directory to your own path if you want, but remember to change the path in the following commands.
 
-### Creating the symlinks
+### Prepare installation
 
-As I'm going to use symlinks, first I create a backup for the nixos directory, then I create a symlink to the nixos configuration files.
+There are several ways to install NixOs, I will describe the way I use to install it.
 
-```bash
-    [ -d /mnt/etc/nixos ] && mv /mnt/etc/nixos /mnt/etc/nixos.bkp; ln -sfv /mnt/etc/dotfiles/nix /mnt/etc/nixos
-```
-
-### A Command To Rule Them All
-
-If you want to run all the commands in one go, you can use the following command.
+The repository contains a tool that I've called [nioscli](#nioscli) that I've developed to make the installation commands more verbose.
+If you want to use this tool as well you **must** give it execution permission.
 
 ```bash
-    curl -L https://github.com/dev-vinicius-andrade/nix-config/archive/refs/heads/main.tar.gz | tar xz --strip-components=1 -C /mnt/etc/dotfiles/nixos-config && \
-    chmod +x ./nixos-config/init.sh && \
-    ./nixos-config/init.sh /etc/nixos
-```
-
-Or you can run each command separately.
-
-- [Clear the nixos configuration files](#clear-the-nixos-configuration-files)
-- [Cloning the repository](#cloning-the-repository)
-- [Init script](#init-script)
-  - [Script permissions](#script-permissions)
-  - [Running the script](#running-the-script)
-
-### Clear the nixos configuration files
-
-```bash
-    rm -rf /etc/nixos/*
-```
-
-### Cloning the repository
-
-As I'm using the minimal ISO I'm use curl to clone the repository.
-
-```bash
-    curl -L https://github.com/dev-vinicius-andrade/nix-config/archive/refs/heads/main.tar.gz | tar xz --strip-components=1 -C ./nixos-config
-```
-
-This will clone the repository to the `./nixos-config` directory.
-
-If you want you can clone the repository using git, but you need to install it first.
-
-```bash
-    nix-env -i git
-    git clone https://github.com/dev-vinicius-andrade/nix-config.git ./nixos-config
-```
-
-### Init script
-
-The repository contains a [init.sh](init.sh) script that will do some initial configurations for you.
-
-- Copies the [variables.template.nix](variables.template.nix) to [variables.nix](variables.nix);
-
-#### Script permissions
-
-After cloning the repository you need to give the script execution permission.
-
-```bash
-    chmod +x ./nixos-config/init.sh
-```
-
-#### Running the script
-
-```bash
-    ./nixos-config/init.sh
+    chmod +x /root/nixos-configuration/nix/tools/nioscli
 ```
 
 #### Personalization
@@ -159,6 +121,12 @@ To Install NixOs firts you need to bootstrap the disks, to do it you can use the
 sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko ./nixos-config/nix/disko/default/disko.nix  --show-trace
 ```
 
+Or you can use the [nioscli](#nioscli) tool to do it:
+
+```bash
+/root/nixos-configuration/nix/tools/nioscli create disko --path /root/nixos-configuration/nix/disko/default/disko.nix
+```
+
 Here we are using the `disko` tool to bootstrap the disks, you can check the [disko.nix](nix/disko/default/disko.nix) file to see the configurations.
 You can also check the [disko documentation here](https://github.com/nix-community/disko)
 
@@ -171,20 +139,39 @@ After bootstrapping the disks you need to generate the hardware configuration, t
 ```bash
 nixos-generate-config --root /mnt --no-filesystems && \
 rm /mnt/etc/nixos/configuration.nix && \
-cp /mnt/etc/nixos/hardware-configuration.nix ./nixos-config/nix/hardware-configuration.nix && \
-mkdir -p /mnt/usr/share/dotfiles && \
-cp -r ./nixos-config/* /mnt/usr/share/dotfiles && \
-([ -d /mnt/etc/nixos ] && mv /mnt/etc/nixos /mnt/etc/nixos.bkp) && \
-ln -sfv /usr/share/dotfiles/nix /etc/nixos
+cp /mnt/etc/nixos/hardware-configuration.nix /root/nixos-configuration/nix/hardware-configuration.nix
 ```
 
-The above command will:
+Or you can use the [nioscli](#nioscli) tool to do it:
 
-- Generate the hardware configuration and create the file `/mnt/etc/nixos/hardware-configuration.nix` and remove the default configuration.nix file;
-- Copy the hardware configuration to the [nix folder](nix)(which is ignored by git);
-- Create a directory `/usr/share/dotfiles` and copy the nix repository to it;
-- Create a backup of the `/mnt/etc/nixos` directory if it exists;
-- Create a symlink to the nix repository in the `/etc/nixos` directory pointing to the `/usr/share/dotfiles/nix` directory;
+```bash
+/root/nixos-configuration/nix/tools/nioscli create hardware --no-filesystem --move-file --destination /root/nixos-configuration/nix
+```
+
+##### Generating the variables from the templates
+
+If you choose to use the nioscli tool you can generate the variables from the templates using the following command:
+
+```bash
+./nixos-config/nix/tools/nioscli templates --src ./nixos-config/nix/templates --dest ./nixos-config/nix/ 
+```
+
+Or you can do it manually:
+
+```bash
+mkdir -p /root/nixos-configuration/nix/templates && \
+cp -r /root/nixos-configuration/nix/templates/* /root/nixos-configuration/nix/
+```
+
+###### Changing the variables
+
+After copying the templates to the variables directory, you can change according to your needs.
+The idea of those files are not to replace the nixos way of doing things, but to make some common configurations that may vary from system to system easier to change.
+
+Take a look at the files in the [templates folder](nix/templates/) to see the variables that you can change
+
+- [common.template.nix](nix/templates/variables/common.template.nix) - A common sets of variables that will be used to all hosts.
+- [hostname.template.nix](nix/templates/variables/hostname.template.nix) - A host specific configuration file.
 
 ##### Running NixOS Install
 
@@ -192,22 +179,28 @@ If you followed all the steps above you are ready to install NixOS.
 Run the following command to install NixOS:
 
 ```bash
-nixos-install --root /mnt --flake /mnt/usr/share/dotfiles/nix#default
-#sudo  cp -r ./nixos-config/* /mnt/etc/nixos && nixos-install --root /mnt --flake /mnt/etc/nixos/nix/flakes/default#default
+nixos-install --root /mnt --flake /root/nixos-configuration/nix#default
 ```
 
-> Note: The `--flake /mnt/etc/nixos#nixos` is the path to the flake, you can change it to your own path if you want, and change the `#default` to the. name of the system you want to install.
+> Note: The `--flake /root/nixos-configuration/nix#default` is the path to the flake, you can change it to your own path if you want, and change the `#default` to the. name of the system you want to install.
 
-Shutdown your machine and remove the USB drive(or the ISO) and boot your machine.
 
-#### Post Installation
+##### Post Installation
 
-I recommend running the following commands after the installation:
+After the installation copy the `/root/nixos-configuration/nix` directory to `/mnt/etc/nixos`:
+This way you can keep the configurations in the default nixos configuration directory.
 
 ```bash
-    mkdir -p /usr/share/dotfiles && \
-    [ -d /etc/nixos ] && mv /etc/nixos /etc/nixos.bkp; cp /mnt/etc/nixos.bkp/hardware-configuration.nix /usr/share/dotfiles/nix && ln -sfv /usr/share/dotfiles/nix /etc/nixos
+[ -d /mnt/etc/nixos ] && cp -r /mnt/etc/nixos /mnt/etc/nixos.bkp;  rm -Rf /mnt/etc/nixos/* && cp -r ./nixos-config/nix/* /mnt/etc/nixos
 ```
+
+The command above will:
+
+- Create a backup of the nixos configuration files;
+- Remove the current configuration files;
+- Copy the files from the repository to the nixos configuration directory.
+
+Shutdown your machine and remove the USB drive(or the ISO) and boot your machine.
 
 ## Nioscli
 
@@ -217,6 +210,31 @@ chmod +x ./nixos-config/nix/tools/nioscli && \
 ./nixos-config/nix/tools/nioscli create disko --path ./nixos-config/nix/disko/default/disko.nix  && \
 ./nixos-config/nix/tools/nioscli create hardware --no-filesystem --move-file --destination ./nixos-config/nix && \
 ./nixos-config/nix/tools/nioscli templates --src ./nixos-config/nix/templates --dest ./nixos-config/nix/ && \
+nixos-install --root /mnt --flake ./nixos-config/nix#default  && \
+[ -d /mnt/etc/nixos ] && cp -r /mnt/etc/nixos /mnt/etc/nixos.bkp;  rm -Rf /mnt/etc/nixos/* && cp -r ./nixos-config/nix/* /mnt/etc/nixos
+```
+
+### Nixoscli
+
+Nioscli is a cli tool that I've created to help me run some commands in the nixos installation process.
+The main goal is not to create a tool to replace the nixos tools, but to help use the terminal in a more verbose way.
+Currently I didn't have time to create a documentation for it, but you can use the `nioscli --help` to see the available commands.
+
+Basically you can run bootrap the disks, generate the hardware configuration, generate the nixos configuration files;
+
+## A Command To Rule Them All
+
+If you want to run all the commands in one go you can use the following command:
+
+```bash
+nix-env -i git && \
+chmod +x ./nixos-config/nix/tools/nioscli && \
+./nixos-config/nix/tools/nioscli create disko --path ./nixos-config/nix/disko/default/disko.nix  && \
+./nixos-config/nix/tools/nioscli create hardware --no-filesystem --move-file --destination ./nixos-config/nix && \
+./nixos-config/nix/tools/nioscli templates --src ./nixos-config/nix/templates --dest ./nixos-config/nix/ 
+
+# I didn't put the nixos-install command together with the others, because you may want to personalize the variables before running the nixos-install command
+# After running the commands above you can run the following command to install nixos
 nixos-install --root /mnt --flake ./nixos-config/nix#default  && \
 [ -d /mnt/etc/nixos ] && cp -r /mnt/etc/nixos /mnt/etc/nixos.bkp;  rm -Rf /mnt/etc/nixos/* && cp -r ./nixos-config/nix/* /mnt/etc/nixos
 ```
