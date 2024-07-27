@@ -19,8 +19,7 @@ let
         if !user.dot_files.enable then
             null
         else if user.dot_files.path != null && user.dot_files.path != "" then
-            createSymlink user "${user.dot_files.path}" "/home/${user.name}/dotfiles"
-            "/home/${user.name}/dotfiles"
+            user.dot_files.path
         else if user.dot_files.git != null && user.dot_files.git.url != "" then
             builtins.fetchGit {
             url = user.dot_files.git.url;
@@ -81,15 +80,19 @@ let
                                 echo "Creating writable dotfiles directory" >> /home/${user.name}/debug.log
                                 mkdir -p "${writableDotfiles}"
                             fi
-
-                            echo "Copying dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
-                            cp -r ${dotfiles}/. ${writableDotfiles}
-                            echo "Giving permission to write  dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
-                            ${functions.giveOwnership user "${writableDotfiles}"}
-                            ${functions.giveAllPermissions "${writableDotfiles}"}
-                            ${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
-                            ${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
-                            echo "Creating symlinks" >> /home/${user.name}/debug.log
+                            if [ "${isWsl}" = "true" ]; then
+                                echo "Creating symlinks for dotfiles in WSL" >> /home/${user.name}/debug.log
+                                ${functions.createSymlink user "${dotfiles}" "${writableDotfiles}"}
+                            else
+                                echo "Copying dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
+                                cp -r ${dotfiles}/. ${writableDotfiles}
+                                echo "Giving permission to write dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
+                                ${functions.giveOwnership user "${writableDotfiles}"}
+                                ${functions.giveAllPermissions "${writableDotfiles}"}
+                                ${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
+                                ${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
+                                echo "Creating symlinks" >> /home/${user.name}/debug.log
+                            fi
                             
                             ${functions.createSymlink user "${writableDotfiles}/nvim" "/home/${user.name}/.config/nvim"}
                             ${functions.createSymlink user "${writableDotfiles}/nvim" "/home/${user.name}/.config/nvim"}
