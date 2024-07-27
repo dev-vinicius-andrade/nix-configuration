@@ -40,6 +40,7 @@
           specialArgs = {inherit inputs;};
           system = wsl_vars.system;
           modules = [
+            home-manager.nixosModules.home-manager
             nixos-wsl.nixosModules.default
             ./hosts/wsl/configuration.nix 
           ];
