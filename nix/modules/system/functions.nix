@@ -92,10 +92,6 @@ let
                                 cp -r ${dotfiles}/. ${writableDotfiles}
                                 echo "Giving permission to write dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
                                 ${functions.giveOwnership user "${writableDotfiles}"}
-                                #${functions.giveAllPermissions "${writableDotfiles}"}
-                                #${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
-                                #${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
-                                echo "Creating symlinks" >> /home/${user.name}/debug.log
                             fi
                             
                             ${functions.giveOwnership user "${writableDotfiles}"}
