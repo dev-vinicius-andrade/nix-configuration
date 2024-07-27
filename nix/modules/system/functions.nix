@@ -80,7 +80,7 @@ let
                                 echo "Creating writable dotfiles directory" >> /home/${user.name}/debug.log
                                 mkdir -p "${writableDotfiles}"
                             fi
-                            if [ "${isWsl}" = "true" ]; then
+                            if [ ${isWsl} = true ]; then
                                 echo "Creating symlinks for dotfiles in WSL" >> /home/${user.name}/debug.log
                                 ${functions.createSymlink user "${dotfiles}" "${writableDotfiles}"}
                             else
