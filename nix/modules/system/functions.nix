@@ -132,7 +132,10 @@ let
                             ];
                         };
                         initExtra=''
-                            [[ -f /home/${user.name}/dotfiles/.zshrc ]] && source \"${writableDotfiles}/.zshrc\"
+                            REAL_ZSHRC_PATH=$(readlink -f /home/${user.name}/dotfiles/.zshrc)
+                            if [[ -f "$REAL_ZSHRC_PATH" ]]; then
+                                source "$REAL_ZSHRC_PATH"
+                            fi
                         '';
                     } else {
                         enable = false;
