@@ -79,7 +79,6 @@ let
                             if [ "${toString isWsl}" = "1" ]; then
                                 echo "Creating symlinks for dotfiles in WSL" >> /home/${user.name}/debug.log
                                 ${functions.createSymlink user "${dotfiles}" "${writableDotfiles}"}
-
                                 if [ -d "$HOST_HOME/.ssh"]; then
                                       ${functions.createSymlink user "$HOST_HOME/.ssh" "~/.ssh"}
                                 fi
