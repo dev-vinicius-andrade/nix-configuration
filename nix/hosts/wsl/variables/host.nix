@@ -18,6 +18,7 @@
             name = "nixos";
             isNormalUser = true;
             extraGroups = ["wheel" "networkmanager"];
+            initialPassword = null;
             defaultShell = "zsh";
             dot_files = {
                 enable = true;

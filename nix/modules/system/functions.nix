@@ -52,7 +52,7 @@ let
         createUserConfig = user: {
             "${user.name}" = {
             isNormalUser = user.isNormalUser;
-            initialPassword = if isWsl && user.initialPassword!=null && user.initialPassword!="" then user.initialPassword else null;
+            initialPassword = if isWsl then null else user.initialPassword;
             extraGroups = user.extraGroups;
             home = "/home/${user.name}";
             shell = builtins.getAttr user.defaultShell pkgs;
