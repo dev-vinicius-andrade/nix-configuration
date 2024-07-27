@@ -9,9 +9,11 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+    nixos-wsl.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, disko,home-manager, sops-nix ,... }@inputs:
+  outputs = { self, nixpkgs, disko,home-manager, sops-nix, nixos-wsl,... }@inputs:
 
     let
       example_vars = import ./hosts/example/variables/common.nix;
@@ -38,6 +40,7 @@
           specialArgs = {inherit inputs;};
           system = wsl_vars.system;
           modules = [
+            nixos-wsl.nixosModules.default
             ./hosts/wsl/configuration.nix 
           ];
         };
