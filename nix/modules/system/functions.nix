@@ -92,14 +92,18 @@ let
                                 cp -r ${dotfiles}/. ${writableDotfiles}
                                 echo "Giving permission to write dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
                                 ${functions.giveOwnership user "${writableDotfiles}"}
-                                ${functions.giveAllPermissions "${writableDotfiles}"}
-                                ${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
-                                ${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
+                                #${functions.giveAllPermissions "${writableDotfiles}"}
+                                #${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
+                                #${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
                                 echo "Creating symlinks" >> /home/${user.name}/debug.log
                             fi
                             
-                            ${functions.createSymlink user "${writableDotfiles}/nvim" "/home/${user.name}/.config/nvim"}
-                            ${functions.createSymlink user "${writableDotfiles}/nvim" "/home/${user.name}/.config/nvim"}
+                            ${functions.giveOwnership user "${writableDotfiles}"}
+                            ${functions.giveAllPermissions "${writableDotfiles}"}
+                            ${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
+                            ${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
+                            ${functions.createSymlink user "${writableDotfiles}/nvim/lua" "/home/${user.name}/.config/nvim/lua"}
+                            ${functions.createSymlink user "${writableDotfiles}/nvim/init.lua" "/home/${user.name}/.config/nvim/init.lua"}
                             ${functions.createSymlink user "${writableDotfiles}/starship" "/home/${user.name}/.config/starship"}
                             ${functions.createSymlink user "${writableDotfiles}/nushell" "/home/${user.name}/.config/nushell"}
                             ${functions.createSymlink user "${writableDotfiles}/zellij" "/home/${user.name}/.config/zellij"}
