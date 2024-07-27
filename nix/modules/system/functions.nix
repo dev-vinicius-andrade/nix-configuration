@@ -19,7 +19,8 @@ let
         if !user.dot_files.enable then
             null
         else if user.dot_files.path != null && user.dot_files.path != "" then
-            user.dot_files.path
+            createSymlink user "${user.dot_files.path}" "/home/${user.name}/dotfiles"
+            "/home/${user.name}/dotfiles"
         else if user.dot_files.git != null && user.dot_files.git.url != "" then
             builtins.fetchGit {
             url = user.dot_files.git.url;
