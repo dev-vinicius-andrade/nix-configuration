@@ -76,10 +76,7 @@ let
                         postActivate  = ''
                             if [ -n "${dotfiles}" ]; then
                             echo "Dotfiles are not null" >> /home/${user.name}/debug.log
-                            if [ ! -d "${writableDotfiles}" ]; then
-                                echo "Creating writable dotfiles directory" >> /home/${user.name}/debug.log
-                                mkdir -p "${writableDotfiles}"
-                            fi
+ 
                             if [ "${toString isWsl}" = "true" ]; then
                                 echo "Creating symlinks for dotfiles in WSL" >> /home/${user.name}/debug.log
                                 ${functions.createSymlink user "${dotfiles}" "${writableDotfiles}"}
@@ -88,6 +85,10 @@ let
                                       ${functions.createSymlink user "$HOST_HOME/.ssh" "~/.ssh"}
                                 fi
                             else
+                                if [ ! -d "${writableDotfiles}" ]; then
+                                    echo "Creating writable dotfiles directory" >> /home/${user.name}/debug.log
+                                    mkdir -p "${writableDotfiles}"
+                                fi
                                 echo "Copying dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
                                 cp -r ${dotfiles}/. ${writableDotfiles}
                                 echo "Giving permission to write dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log

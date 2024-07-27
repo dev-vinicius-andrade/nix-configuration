@@ -230,11 +230,11 @@ If you want to run all the commands in one go you can use the following command:
 nix-env -i git && \
 chmod +x ./nixos-config/nix/tools/nioscli && \
 ./nixos-config/nix/tools/nioscli create disko --path ./nixos-config/nix/disko/default/disko.nix  && \
-./nixos-config/nix/tools/nioscli create hardware --no-filesystem --move-file --destination ./nixos-config/nix && \
+./nixos-config/nix/tools/nioscli create hardware --no-filesystem --move-file --destination ./nixos-config/nix/hosts/example && \
 ./nixos-config/nix/tools/nioscli templates --src ./nixos-config/nix/templates --dest ./nixos-config/nix/ 
 
 # I didn't put the nixos-install command together with the others, because you may want to personalize the variables before running the nixos-install command
 # After running the commands above you can run the following command to install nixos
-nixos-install --root /mnt --flake ./nixos-config/nix#default  && \
+nixos-install --root /mnt --flake ./nixos-config/nix#example  && \
 [ -d /mnt/etc/nixos ] && cp -r /mnt/etc/nixos /mnt/etc/nixos.bkp;  rm -Rf /mnt/etc/nixos/* && cp -r ./nixos-config/nix/* /mnt/etc/nixos
 ```
