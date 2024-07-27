@@ -1,4 +1,4 @@
-{common_vars,hosts_vars, ...}:
+{common_vars,host_vars, ...}:
 {config,lib,pkgs,...}:{
     config={
         fonts.packages= with pkgs;[

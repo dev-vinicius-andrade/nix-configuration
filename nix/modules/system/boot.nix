@@ -1,4 +1,4 @@
-{common_vars,hosts_vars}:{config, lib, pkgs, ...}:
+{common_vars,host_vars}:{config, lib, pkgs, ...}:
 {
     boot.loader= {
         grub = {

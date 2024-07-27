@@ -13,29 +13,44 @@
 
   outputs = { self, nixpkgs, disko,home-manager, sops-nix ,... }@inputs:
 
-    let 
-      common_vars = import ./variables/common.nix;
-      hosts_vars= import ./variables/hosts.nix;
-      defaultSystem = common_vars.system;
+    let
+      example_vars = import ./hosts/example/variables/common.nix;
     in
    {
     defaultPackage.x86_64-linux = home-manager.defaultPackage.x86_64-linux;
     defaultPackage.x86_64-darwin = home-manager.defaultPackage.x86_64-darwin;
     nixosConfigurations = {
-      default = nixpkgs.lib.nixosSystem {
-        specialArgs = {inherit inputs;};
-        system = defaultSystem;
-        modules = [
-          disko.nixosModules.disko
-          inputs.home-manager.nixosModules.default
-          home-manager.nixosModules.home-manager
-          sops-nix.nixosModules.sops        
-          ./hardware-configuration.nix
-          ./disko/default/disko.nix
-          ./configurations/common/configuration.nix
-          ./configurations/default/configuration.nix          
-        ];
+        example = nixpkgs.lib.nixosSystem {
+          specialArgs = {inherit inputs;};
+          system = example_vars.system;
+          modules = [
+            disko.nixosModules.disko
+            inputs.home-manager.nixosModules.default
+            home-manager.nixosModules.home-manager
+            sops-nix.nixosModules.sops        
+            ./disko/default/disko.nix
+            ./hosts/example/hardware-configuration.nix
+            ./hosts/example/configuration.nix          
+          ];
+        };
+        wsl = nixpkgs.lib.nixosSystem {
+          specialArgs = {inherit inputs;};
+          system = example_vars.system;
+          modules = [
+          ];
+        };
+        # "${host}" = nixpkgs.lib.nixosSystem {
+        #   specialArgs = {inherit inputs;};
+        #   system = defaultSystem;
+        #   modules = [
+        #     disko.nixosModules.disko
+        #     inputs.home-manager.nixosModules.default
+        #     home-manager.nixosModules.home-manager
+        #     sops-nix.nixosModules.sops
+        #     disko_config        
+        #     ./hosts/${host}/configuration.nix          
+        #   ];
+        # };
       };
-    };
   };
 }

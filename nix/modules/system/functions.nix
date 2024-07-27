@@ -1,21 +1,33 @@
-{config, lib, pkgs, ...}:
+{common_vars,host_vars, ...}:{config, lib, pkgs, ...}:
 let
  functions = rec {
+        containsPackage = package: packages: lib.elem package packages;
+        # Check if Docker is in system packages
+        packageInSystemPackages = package: containsPackage package host_vars.host.packages;
+
+        # Check if Docker is in any user packages
+        packageInUserPackages = package:  if host_vars.users == null ||  !host_vars.users.enable || !host_vars.users.homeManager then false else   lib.any (user: containsPackage package user.packages) host_vars.users.users;
+
+        # Docker should be enabled if Docker is in system packages or any user packages
+        isPackageEnabled = package: (packageInSystemPackages package)  || (packageInUserPackages package) ;
         copyFiles = src: dest: ''
             mkdir -p ${dest}
             cp -r ${src}/* ${dest}
         '';
-
+        isWsl = host_vars.host.isWsl;
         getDotFiles = user:
-            if !user.dot_files.enable || user.dot_files.git == null || user.dot_files.git.url == "" then 
-            null 
-            else 
+        if !user.dot_files.enable then
+            null
+        else if user.dot_files.path != null && user.dot_files.path != "" then
+            user.dot_files.path
+        else if user.dot_files.git != null && user.dot_files.git.url != "" then
             builtins.fetchGit {
-                url = user.dot_files.git.url;
-                ref = user.dot_files.git.ref;
-                rev = user.dot_files.git.commit_id;
-            };
-
+            url = user.dot_files.git.url;
+            ref = user.dot_files.git.ref;
+            rev = user.dot_files.git.commit_id;
+            }
+        else
+            null;
         createSymlink = user: src: dest: ''
             ln -sfn ${src} ${dest}
             echo "Created symlink from ${src} to ${dest}" >> /home/${user.name}/debug.log
@@ -56,39 +68,72 @@ let
         {
             
             users."${user.name}" = {
-            home = {
-                homeDirectory = "/home/${user.name}";
-                stateVersion = stateVersion;
-                packages = with pkgs; map (program: pkgs.${program}) user.packages;
-                activation = {
-                postActivate  = ''
-                    if [ -n "${dotfiles}" ]; then
-                    echo "Dotfiles are not null" >> /home/${user.name}/debug.log
-                    if [ ! -d "${writableDotfiles}" ]; then
-                        echo "Creating writable dotfiles directory" >> /home/${user.name}/debug.log
-                        mkdir -p "${writableDotfiles}"
-                    fi
+                home = {
+                    homeDirectory = "/home/${user.name}";
+                    stateVersion = stateVersion;
+                    packages = with pkgs; map (program: pkgs.${program}) user.packages;
+                    activation = {
+                        postActivate  = ''
+                            if [ -n "${dotfiles}" ]; then
+                            echo "Dotfiles are not null" >> /home/${user.name}/debug.log
+                            if [ ! -d "${writableDotfiles}" ]; then
+                                echo "Creating writable dotfiles directory" >> /home/${user.name}/debug.log
+                                mkdir -p "${writableDotfiles}"
+                            fi
 
-                    echo "Copying dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
-                    cp -r ${dotfiles}/. ${writableDotfiles}
-                    echo "Giving permission to write  dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
-                    ${functions.giveOwnership user "${writableDotfiles}"}
-                    ${functions.giveAllPermissions "${writableDotfiles}"}
-                    ${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
-                    ${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
-                    echo "Creating symlinks" >> /home/${user.name}/debug.log
-                    ${functions.createSymlink user "${writableDotfiles}/.zshrc" "/home/${user.name}/.zshrc"}
-                    ${functions.createSymlink user "${writableDotfiles}/nvim" "/home/${user.name}/.config/nvim"}
-                    ${functions.createSymlink user "${writableDotfiles}/nvim" "/home/${user.name}/.config/nvim"}
-                    ${functions.createSymlink user "${writableDotfiles}/starship" "/home/${user.name}/.config/starship"}
-                    ${functions.createSymlink user "${writableDotfiles}/nushell" "/home/${user.name}/.config/nushell"}
-                    ${functions.createSymlink user "${writableDotfiles}/zellij" "/home/${user.name}/.config/zellij"}
-                    else
-                    echo "Dotfiles are null" >> /home/${user.name}/debug.log
-                    fi
-                '';
+                            echo "Copying dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
+                            cp -r ${dotfiles}/. ${writableDotfiles}
+                            echo "Giving permission to write  dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
+                            ${functions.giveOwnership user "${writableDotfiles}"}
+                            ${functions.giveAllPermissions "${writableDotfiles}"}
+                            ${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
+                            ${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
+                            echo "Creating symlinks" >> /home/${user.name}/debug.log
+                            
+                            ${functions.createSymlink user "${writableDotfiles}/nvim" "/home/${user.name}/.config/nvim"}
+                            ${functions.createSymlink user "${writableDotfiles}/nvim" "/home/${user.name}/.config/nvim"}
+                            ${functions.createSymlink user "${writableDotfiles}/starship" "/home/${user.name}/.config/starship"}
+                            ${functions.createSymlink user "${writableDotfiles}/nushell" "/home/${user.name}/.config/nushell"}
+                            ${functions.createSymlink user "${writableDotfiles}/zellij" "/home/${user.name}/.config/zellij"}
+                            else
+                                echo "Dotfiles are null" >> /home/${user.name}/debug.log
+                            fi
+                        '';
+                    };
+                    
                 };
-            };
+                programs= {
+                    zsh = if isPackageEnabled "zsh" then {
+                        enable = true;
+                        enableCompletion=true;
+                        autosuggestion.enable=true;
+                        history.expireDuplicatesFirst=true;
+                        syntaxHighlighting.enable=true;
+                        #dotDir= ".config/zsh-custom";
+                        oh-my-zsh= {
+                            enable=true;
+                            theme="robbyrussell";
+                            plugins=[
+                                "fzf"
+                                "golang"
+                                "helm"
+                                "dotnet"
+                                "docker"
+                                "docker-compose"
+                                "emoji"
+                                "eza"
+                                "direnv"
+                                "git"
+                                "zsh-interactive-cd"
+                            ];
+                        };
+                        initExtra=''
+                            [[ -f /home/${user.name}/dotfiles/.zshrc ]] && source \"${writableDotfiles}\".zshrc
+                        '';
+                    } else {
+                        enable = false;
+                    };
+                };
             };
         };
     };

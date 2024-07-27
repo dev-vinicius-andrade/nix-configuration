@@ -8,7 +8,7 @@
 hardware-configuration.nix
 
 .custom_modules_state
-nix/variables
+#nix/variables
 
 # Ignore all .nix files in all directories
 #**/*.nix

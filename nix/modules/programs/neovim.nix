@@ -1,4 +1,4 @@
-{common_vars,hosts_vars, ...}:{config,pkgs,self,...}:{
+{common_vars,host_vars, ...}:{config,pkgs,self,...}:{
     config = {
         programs.neovim = 
          {

@@ -1,6 +1,6 @@
-{common_vars,hosts_vars, ...}: {config, lib, pkgs, ...}:
+{common_vars,host_vars, ...}: {config, lib, pkgs, ...}:
 {
-    networking.hostName = hosts_vars.host.name;
+    networking.hostName = host_vars.host.name;
 }
 
 

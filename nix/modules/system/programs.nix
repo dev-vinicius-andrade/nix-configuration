@@ -1,4 +1,4 @@
-{ common_vars,hosts_vars, ... }: { config, lib, pkgs, ... }:
+{ common_vars,host_vars, ... }: { config, lib, pkgs, ... }:
 let
   # Function to create program enablement attribute set
   enableProgram = program: {
@@ -6,7 +6,7 @@ let
   };
 
   # List of program configurations
-  enabledPrograms = map enableProgram hosts_vars.programs;
+  enabledPrograms = map enableProgram host_vars.programs;
 in
 {
   config = (lib.mkMerge enabledPrograms);
