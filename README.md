@@ -227,7 +227,7 @@ Basically you can run bootrap the disks, generate the hardware configuration, ge
 If you want to run all the commands in one go you can use the following command:
 
 ```bash
-nix-env -i git && \
+nix-shell -p git && \
 chmod +x ./nixos-config/nix/tools/nioscli && \
 ./nixos-config/nix/tools/nioscli create disko --path ./nixos-config/nix/disko/default/disko.nix  && \
 ./nixos-config/nix/tools/nioscli create hardware --no-filesystem --move-file --destination ./nixos-config/nix/hosts/example && \
