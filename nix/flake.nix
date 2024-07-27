@@ -15,6 +15,7 @@
 
     let
       example_vars = import ./hosts/example/variables/common.nix;
+      wsl_vars = import ./hosts/wsl/variables/common.nix;
     in
    {
     defaultPackage.x86_64-linux = home-manager.defaultPackage.x86_64-linux;
@@ -35,8 +36,9 @@
         };
         wsl = nixpkgs.lib.nixosSystem {
           specialArgs = {inherit inputs;};
-          system = example_vars.system;
+          system = wsl_vars.system;
           modules = [
+            ./hosts/wsl/configuration.nix 
           ];
         };
         # "${host}" = nixpkgs.lib.nixosSystem {
