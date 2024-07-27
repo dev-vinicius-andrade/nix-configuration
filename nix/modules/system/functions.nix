@@ -132,7 +132,7 @@ let
                             ];
                         };
                         initExtra=''
-                            [[ -f /home/${user.name}/dotfiles/.zshrc ]] && source \"${writableDotfiles}\"/.zshrc
+                            [[ -f /home/${user.name}/dotfiles/.zshrc ]] && source \"${writableDotfiles}/.zshrc\"
                         '';
                     } else {
                         enable = false;
