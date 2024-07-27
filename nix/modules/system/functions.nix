@@ -76,7 +76,7 @@ let
                         postActivate  = ''
                             if [ -n "${dotfiles}" ]; then
                             echo "Dotfiles are not null" >> /home/${user.name}/debug.log
-                            echo "IS WSL: ${isWsl}" >> /home/${user.name}/debug.log
+                            echo "IS WSL: ${toString isWsl}" >> /home/${user.name}/debug.log
                             if [ "${toString isWsl}" = "true" ]; then
                                 echo "Creating symlinks for dotfiles in WSL" >> /home/${user.name}/debug.log
                                 ${functions.createSymlink user "${dotfiles}" "${writableDotfiles}"}
