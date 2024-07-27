@@ -15,6 +15,15 @@ let
             cp -r ${src}/* ${dest}
         '';
         isWsl = host_vars.host.isWsl;
+        getWslInfo = ''
+        if grep -qi "microsoft\\|wsl" /proc/version; then
+            export IS_WSL=true
+            export HOST_HOME=$(wslpath $(cmd.exe /C "echo %USERPROFILE%" 2>/dev/null) | tr -d "\r")
+        else
+            export IS_WSL=false
+            export HOST_HOME=$HOME
+        fi
+        '';
         getDotFiles = user:
         if !user.dot_files.enable then
             null
@@ -30,6 +39,7 @@ let
             null;
         createSymlink = user: src: dest: ''
             ln -sfn ${src} ${dest}
+            mkdir -p $(dirname ${dest})
             echo "Created symlink from ${src} to ${dest}" >> /home/${user.name}/debug.log
         '';
 
@@ -76,32 +86,33 @@ let
                         postActivate  = ''
                             if [ -n "${dotfiles}" ]; then
                             echo "Dotfiles are not null" >> /home/${user.name}/debug.log
-                            if [ "${toString isWsl}" = "1" ]; then
-                                echo "Creating symlinks for dotfiles in WSL" >> /home/${user.name}/debug.log
-                                ${functions.createSymlink user "${dotfiles}" "${writableDotfiles}"}
-                                if [ -d "$HOST_HOME/.ssh"]; then
-                                      ${functions.createSymlink user "$HOST_HOME/.ssh" "~/.ssh"}
+                                if [ "${toString isWsl}" = "1" ]; then
+                                    echo "Creating symlinks for dotfiles in WSL" >> /home/${user.name}/debug.log
+                                    ${functions.createSymlink user "${dotfiles}" "${writableDotfiles}"}
+                                    if [ -d "$HOST_HOME/.ssh"]; then
+                                        ${functions.createSymlink user "$HOST_HOME/.ssh" "~/.ssh"}
+                                    fi
+                                    ${getWslInfo}
+                                else
+                                    if [ ! -d "${writableDotfiles}" ]; then
+                                        echo "Creating writable dotfiles directory" >> /home/${user.name}/debug.log
+                                        mkdir -p "${writableDotfiles}"
+                                    fi
+                                    echo "Copying dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
+                                    cp -r ${dotfiles}/. ${writableDotfiles}
+                                    echo "Giving permission to write dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
+                                    ${functions.giveOwnership user "${writableDotfiles}"}
                                 fi
-                            else
-                                if [ ! -d "${writableDotfiles}" ]; then
-                                    echo "Creating writable dotfiles directory" >> /home/${user.name}/debug.log
-                                    mkdir -p "${writableDotfiles}"
-                                fi
-                                echo "Copying dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
-                                cp -r ${dotfiles}/. ${writableDotfiles}
-                                echo "Giving permission to write dotfiles to ${writableDotfiles}" >> /home/${user.name}/debug.log
+                                
                                 ${functions.giveOwnership user "${writableDotfiles}"}
-                            fi
-                            
-                            ${functions.giveOwnership user "${writableDotfiles}"}
-                            ${functions.giveAllPermissions "${writableDotfiles}"}
-                            ${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
-                            ${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
-                            ${functions.createSymlink user "${writableDotfiles}/nvim/lua" "/home/${user.name}/.config/nvim/lua"}
-                            ${functions.createSymlink user "${writableDotfiles}/nvim/init.lua" "/home/${user.name}/.config/nvim/init.lua"}
-                            ${functions.createSymlink user "${writableDotfiles}/starship" "/home/${user.name}/.config/starship"}
-                            ${functions.createSymlink user "${writableDotfiles}/nushell" "/home/${user.name}/.config/nushell"}
-                            ${functions.createSymlink user "${writableDotfiles}/zellij" "/home/${user.name}/.config/zellij"}
+                                ${functions.giveAllPermissions "${writableDotfiles}"}
+                                ${functions.giveAllPermissions "/home/${user.name}/.local/share/nvim"}
+                                ${functions.giveAllPermissions "/home/${user.name}/.local/state/nvim"}
+                                ${functions.createSymlink user "${writableDotfiles}/nvim/lua" "/home/${user.name}/.config/nvim/lua"}
+                                ${functions.createSymlink user "${writableDotfiles}/nvim/init.lua" "/home/${user.name}/.config/nvim/init.lua"}
+                                ${functions.createSymlink user "${writableDotfiles}/starship" "/home/${user.name}/.config/starship"}
+                                ${functions.createSymlink user "${writableDotfiles}/nushell" "/home/${user.name}/.config/nushell"}
+                                ${functions.createSymlink user "${writableDotfiles}/zellij" "/home/${user.name}/.config/zellij"}
                             else
                                 echo "Dotfiles are null" >> /home/${user.name}/debug.log
                             fi
